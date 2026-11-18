@@ -1,0 +1,13 @@
+# Compiled output
+*.class
+
+# Build / IDE files
+target/
+build/
+.idea/
+*.iml
+.vscode/
+
+# Jenkins runtime
+jenkins.war
+jenkins_home/
