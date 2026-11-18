@@ -1,0 +1,54 @@
+============================================================
+CI/CD LAB - COMMANDS  (Jenkins + Docker + GitHub)
+============================================================
+
+--- 1. START DOCKER ---
+Start-Process "$env:LOCALAPPDATA\Programs\DockerDesktop\Docker Desktop.exe" -WindowStyle Hidden   :: Launch Docker Desktop app
+docker info                                                                                        :: Check Docker daemon status
+
+--- 2. COMPILE AND RUN JAVA ---
+cd D:\devops_lab_external\hello-world-jenkins   :: Enter project folder
+javac HelloWorld.java                            :: Compile Java source file
+java HelloWorld                                  :: Run Java program locally
+
+--- 3. BUILD AND RUN DOCKER IMAGE ---
+docker build -t hello-world-jenkins:latest .   :: Build the Docker image
+docker run --rm hello-world-jenkins:latest     :: Run image in container
+docker images hello-world-jenkins              :: List the built image
+
+--- 4. PUSH PROJECT TO GITHUB ---
+git init -b main                                          :: Initialize Git repository
+git config user.name "Harshavardhan1636"                  :: Set Git author name
+git config user.email "Harshavardhan1636@users.noreply.github.com"  :: Set Git author email
+git add .                                                 :: Stage all project files
+git commit -m "Hello World CI/CD demo"                     :: Commit changes with message
+git remote add origin https://github.com/Harshavardhan1636/hello-world-jenkins.git  :: Link repo to GitHub
+git push -u origin main                                   :: Upload commits to GitHub
+gh repo create hello-world-jenkins --public --source=. --remote=origin --push  :: Create GitHub repo
+
+--- 5. OPEN JENKINS ---
+Start-Process "http://localhost:8080"   :: Open Jenkins in browser
+docker start jenkins                    :: Start Jenkins container
+
+--- 6. CREATE PIPELINE JOB (one time, PowerShell) ---
+$base='http://localhost:8080'; $job='hello-world-jenkins'; $s=$null   :: Set Jenkins URL variables
+$c=Invoke-RestMethod "$base/crumbIssuer/api/json" -SessionVariable s   :: Get Jenkins CSRF crumb
+$h=@{ $c.crumbRequestField = $c.crumb }                                 :: Build request header
+$xml=Get-Content 'D:\devops_lab_external\hello-world-jenkins\config.xml' -Raw  :: Read job config
+Invoke-RestMethod "$base/createItem?name=$job" -Method Post -Headers $h -WebSession $s -ContentType 'application/xml' -Body $xml  :: Create Jenkins pipeline job
+
+--- 7. BUILD AND CHECK RESULT ---
+$c=Invoke-RestMethod "$base/crumbIssuer/api/json" -SessionVariable s   :: Get fresh CSRF crumb
+$h=@{ $c.crumbRequestField = $c.crumb }                                 :: Build request header
+Invoke-RestMethod "$base/job/$job/build" -Method Post -Headers $h -WebSession $s  :: Trigger pipeline build
+Invoke-RestMethod "$base/job/$job/lastBuild/consoleText"               :: View Jenkins build log
+
+--- 8. VERIFY ---
+docker images hello-world-jenkins              :: Check Jenkins-built image
+docker run --rm hello-world-jenkins:latest     :: Run final container test
+
+============================================================
+EXPECTED OUTPUT
+Hello, World!
+CI/CD demo: Jenkins -> GitHub -> Docker
+============================================================
