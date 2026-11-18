@@ -50,5 +50,4 @@ docker run --rm hello-world-jenkins:latest     :: Run final container test
 ============================================================
 EXPECTED OUTPUT
 Hello, World!
-CI/CD demo: Jenkins -> GitHub -> Docker
 ============================================================

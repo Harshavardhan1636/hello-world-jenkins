@@ -22,7 +22,6 @@ test, builds a Docker image and finally runs the container.
 
 ```
 Hello, World!
-CI/CD demo: Jenkins -> GitHub -> Docker
 ```
 
 ---
